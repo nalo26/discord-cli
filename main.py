@@ -24,9 +24,7 @@ colorama.init()
 
 class Client(commands.Bot):
     def __init__(self, token):
-        intents = discord.Intents.default()
-        intents.members = True
-        super().__init__(command_prefix="/", intents=intents)
+        super().__init__(command_prefix="/")
         self.loop.create_task(self.user_input())
         self.channel = None
         self.remove_command("help")
@@ -40,7 +38,7 @@ class Client(commands.Bot):
 
     def _run(self, token):
         try:
-            super().run(token, bot=False)
+            super().run(token)
         except discord.errors.LoginFailure:
             cprint("Invalid token provided", "red")
 
@@ -54,7 +52,7 @@ class Client(commands.Bot):
             cprint(
                 "\n".join(
                     (
-                        "Logged in as {0.user} in no specified channel.".format(self),
+                        f"Logged in as {self.user} in no specified channel",
                         "Send a channel ID to start the program",
                     )
                 ),
@@ -72,10 +70,7 @@ class Client(commands.Bot):
         if message.channel.id != self.channel.id:
             return
 
-        # fix for the nerf that prevents selfbots to see messages
-        hist = await message.channel.history(limit=1).flatten() 
-        message = hist[0]
-        print("{0.author}: {0.content}".format(message))
+        print("{0.author.display_name}: {0.content}".format(message))
 
     async def user_input(self):
         await self.wait_until_ready()
