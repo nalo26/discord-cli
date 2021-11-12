@@ -1,4 +1,5 @@
 import os
+import re
 
 # import json
 from argparse import ArgumentParser
@@ -11,6 +12,7 @@ from aioconsole.stream import ainput
 # import requests as rq
 
 from ext.context import Context
+import utils
 
 parser = ArgumentParser("DiscordCLI", description="A discord client, but from CLI")
 parser.add_argument("-t", "--token", help="Your discord account token")
@@ -65,10 +67,12 @@ class Client(commands.Bot):
         await self.wait_until_ready()
         if not self.channel:
             return
-        if message.author.id == self.user.id:
-            return
         if message.channel.id != self.channel.id:
             return
+
+        utils.replace_user_mentions(message, self)
+        utils.replace_roles_mentions(message)
+        utils.replace_channel_mentions(message, self)
 
         print("{0.author.display_name}: {0.content}".format(message))
 
@@ -77,7 +81,8 @@ class Client(commands.Bot):
 
         while not self.is_closed():
             text = await ainput()
-            if not text: continue
+            if not text:
+                continue
 
             ctx = await self.get_context(text)
 
@@ -138,4 +143,4 @@ class Client(commands.Bot):
 
 
 if __name__ == "__main__":
-    Client("")
+    Client(open("token").read())
